@@ -1,0 +1,12 @@
+.button{
+    padding: 5px 15px;
+    background-color: #414141;
+    color: #fff;
+    cursor: pointer;
+    border: none;
+    margin-right: 10px;
+}
+
+.contenedor{
+    overflow: hidden;
+}
