@@ -8,26 +8,39 @@ interface Props {
 }
 
 const variants: Variants = {
-    inicial: {
+    inicial: ({ duration }) => ({
         top: -1024,
-    },
-    entrada: {
+        transition: {
+            duration
+        }
+    }),
+    entrada: ({ duration }) => ({
         top: 0,
-    },
-    salida: {
-        top: -1024
-    }
+        transition: {
+            duration
+        }
+    }),
+    salida: ({ duration }) => ({
+        top: 0,
+        transition: {
+            duration
+        }
+    })
 }
 
 export const Pagepiling: FC<Props> = ({ children }) => {
 
     const [pagina, setPagina] = useState(0)
-    const ref = useRef<HTMLDivElement>(null);
+    const [animando, setAnimando] = useState(false)
+    const ref = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
         const detectarCambio = (e: WheelEvent) => {
             const { deltaY } = e;
-            deltaY > 0 ? setPagina(pagina => pagina + 1) : setPagina(pagina => pagina + 1)
+            if(!animando){
+                setAnimando(true)
+                deltaY > 0 ? setPagina(pagina => pagina + 1) : setPagina(pagina => pagina - 1)
+            }
         }
         ref.current?.addEventListener('wheel', detectarCambio)
 
@@ -44,6 +57,10 @@ export const Pagepiling: FC<Props> = ({ children }) => {
                         key={pagina}
                         className={estilos.contenedor}
                         variants={variants}
+                        onAnimationComplete={()=>setAnimando(false)}
+                        custom={{
+                            duration: 1
+                        }}
                         initial="inicial"
                         animate="entrada"
                         exit="salida"
