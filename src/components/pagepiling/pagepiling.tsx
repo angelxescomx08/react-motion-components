@@ -8,20 +8,21 @@ interface Props {
 }
 
 const variants: Variants = {
-    inicial: ({ duration }) => ({
-        top: -1024,
+    inicial: ({ duration, direccion }) => ({
+        y: direccion === 'incrementando' ? 0  : -1024,
         transition: {
             duration
         }
     }),
-    entrada: ({ duration }) => ({
-        top: 0,
+    entrada: ({ duration, direccion }) => ({
+        y: 0,
         transition: {
             duration
         }
     }),
-    salida: ({ duration }) => ({
-        top: 0,
+    salida: ({ duration, direccion }) => ({
+        y: direccion === 'incrementando' ? -1024 : 0,
+        zIndex: direccion === 'incrementando' ? 100 : 0,
         transition: {
             duration
         }
@@ -30,45 +31,60 @@ const variants: Variants = {
 
 export const Pagepiling: FC<Props> = ({ children }) => {
 
+    const [primera, setPrimera] = useState(true)
     const [pagina, setPagina] = useState(0)
-    const [animando, setAnimando] = useState(false)
-    const ref = useRef<HTMLDivElement>(null)
+    const animando = useRef(false)
+    const [direccion, setDireccion] = useState('')
 
     useEffect(() => {
         const detectarCambio = (e: WheelEvent) => {
             const { deltaY } = e;
-            if(!animando){
-                setAnimando(true)
-                deltaY > 0 ? setPagina(pagina => pagina + 1) : setPagina(pagina => pagina - 1)
+            if (!animando.current) {
+                setPrimera(false)
+                animando.current = true;
+                if(deltaY > 0){
+                    setDireccion('incrementando')
+                    setPagina(pagina => pagina + 1)
+                }else{
+                    setDireccion('decrementando')
+                    setPagina(pagina => pagina - 1)
+                }
             }
         }
-        ref.current?.addEventListener('wheel', detectarCambio)
+        document.addEventListener('wheel', detectarCambio)
 
-        return () => ref.current?.removeEventListener('wheel', detectarCambio)
+        return () => document.removeEventListener('wheel', detectarCambio)
     }, [])
 
     const hijos = Children.map(children, (child) => child)
 
     return (
-        <div ref={ref}>
-            <AnimatePresence>
-                {
-                    <motion.div
-                        key={pagina}
-                        className={estilos.contenedor}
-                        variants={variants}
-                        onAnimationComplete={()=>setAnimando(false)}
-                        custom={{
-                            duration: 1
-                        }}
-                        initial="inicial"
-                        animate="entrada"
-                        exit="salida"
-                    >
-                        {hijos![Math.abs(pagina) % hijos!.length]}
-                    </motion.div>
-                }
-            </AnimatePresence>
-        </div>
+
+        <AnimatePresence
+            custom={{
+                duration: 1,
+                direccion
+            }}
+        >
+            {
+                <motion.div
+                    key={pagina}
+                    className={estilos.contenedor}
+                    variants={variants}
+                    onAnimationComplete={(tipo) => {
+                        if (tipo === 'salida') animando.current = false;
+                    }}
+                    custom={{
+                        duration: 1,
+                        direccion
+                    }}
+                    initial={primera ? "" : "inicial"}
+                    animate="entrada"
+                    exit="salida"
+                >
+                    {hijos![Math.abs(pagina) % hijos!.length]}
+                </motion.div>
+            }
+        </AnimatePresence>
     )
 }

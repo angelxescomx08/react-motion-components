@@ -7,18 +7,18 @@ import { imagenes } from './helpers'
 function App() {
 
   return (
-    <div>
+    <>
       {/* <Slider></Slider> */}
       <Pagepiling>
-        {imagenes.map(imagen => (
+        {imagenes.map((imagen,i) => (
           <img 
-            key={crypto.randomUUID()}
+            key={i}
             src={imagen}
             alt=""
           />
         ))}
       </Pagepiling>
-    </div>
+    </>
   )
 }
 
