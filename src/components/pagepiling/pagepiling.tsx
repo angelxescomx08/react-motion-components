@@ -75,7 +75,7 @@ export const Pagepiling: FC<Props> = ({ children }) => {
                         if (tipo === 'salida') animando.current = false;
                     }}
                     custom={{
-                        duration: 1,
+                        duration: .6,
                         direccion
                     }}
                     initial={primera ? "" : "inicial"}
